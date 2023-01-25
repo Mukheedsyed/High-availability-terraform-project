@@ -112,8 +112,8 @@ resource "aws_security_group" "efs-security-group" {
 
 # Create Security Group for the ElasticCache Server
 resource "aws_security_group" "ElasticCache-security-group" {
-  name        = "efs Security Group"
-  description = "Enable NFS access on port 2049"
+  name        = "ElasticCache Security Group"
+  description = "Enable custom access on port 1211"
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
@@ -132,6 +132,6 @@ resource "aws_security_group" "ElasticCache-security-group" {
   }
 
   tags = {
-    Name = "EFS Security Group"
+    Name = "ElasticCache Security Group"
   }
 }
