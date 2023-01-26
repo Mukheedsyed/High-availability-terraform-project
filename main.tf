@@ -18,7 +18,7 @@ module "vpc" {
   }
 }
 
-# security group module
+# load balancer security group module
 module "elb_sg" {
   source = "terraform-aws-modules/security-group/aws"
 
@@ -43,6 +43,29 @@ module "elb_sg" {
       protocol    = "tcp"
       description = "HTTPS Access"
       cidr_blocks = "0.0.0.0/0"
+    },
+    
+  ]
+}
+
+# EC2 instance security group module
+module "ec2_sg" {
+  source = "terraform-aws-modules/security-group/aws"
+
+  name        = "my-elb"
+  description = "Enable HTTP access on port 80 via ALB"
+  vpc_id      = "vpc"
+
+  ingress_cidr_blocks      = ["0.0.0.0/0"]
+  ingress_rules            = ["http-80-tcp"]
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      description = "HTTP Access"
+      cidr_blocks = "0.0.0.0/0"
+      security_group_id = "elb_sg" 
     },
     
   ]
