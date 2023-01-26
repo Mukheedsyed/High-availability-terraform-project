@@ -24,7 +24,7 @@ module "elb_sg" {
 
   name        = "my-elb"
   description = "Enable HTTP/HTTPS access on port 80/443"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = "vpc"
 
   ingress_cidr_blocks      = ["0.0.0.0/0"]
   ingress_rules            = ["http-80-tcp"]
