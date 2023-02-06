@@ -2,7 +2,7 @@
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "my-vpc"
+  name = "vpc"
   cidr = "10.0.0.0/16"
 
   azs             = ["us-east-1a", "us-east-1b"]
@@ -16,4 +16,34 @@ module "vpc" {
     Terraform = "true"
     Environment = "dev"
   }
+}
+
+# create ALB security group
+
+module "ALB_sg" {
+  source = "terraform-aws-modules/security-group/aws"
+
+  name        = "ALB Security Group"
+  description = "Enable HTTP/HTTPS access on port 80/443"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      description = "HTTP Access"
+      cidr_blocks = "0.0.0.0/0"
+    },
+
+    {
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      description = "HTTPS Access"
+      cidr_blocks = "0.0.0.0/0"
+    }
+
+
+  ]
 }
