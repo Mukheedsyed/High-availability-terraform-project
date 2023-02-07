@@ -2,7 +2,7 @@
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "my-vpc"
+  name = "vpc"
   cidr = "10.0.0.0/16"
 
   azs             = ["us-east-1a", "us-east-1b"]
@@ -18,16 +18,15 @@ module "vpc" {
   }
 }
 
-# security group module
-module "elb_sg" {
+# create ALB security group
+
+module "ALB_sg" {
   source = "terraform-aws-modules/security-group/aws"
 
-  name        = "my-elb"
+  name        = "ALB_sg"
   description = "Enable HTTP/HTTPS access on port 80/443"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = module.vpc.vpc_id
 
-  ingress_cidr_blocks      = ["0.0.0.0/0"]
-  ingress_rules            = ["http-80-tcp"]
   ingress_with_cidr_blocks = [
     {
       from_port   = 80
@@ -36,14 +35,40 @@ module "elb_sg" {
       description = "HTTP Access"
       cidr_blocks = "0.0.0.0/0"
     },
-    
+
     {
       from_port   = 443
       to_port     = 443
       protocol    = "tcp"
       description = "HTTPS Access"
       cidr_blocks = "0.0.0.0/0"
+    }
+
+  ]
+}
+
+# Create Security Group for the Web Server
+
+module "EC2_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  name    = "EC2-sg"
+  vpc_id  = module.vpc.vpc_id
+
+  ingress_with_source_security_group_id = [
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      description = "Enable HTTP access on port 80 via ALB SG"
+      source_security_group_id = "${module.ALB_sg.security_group_id}"
     },
-    
+  ]
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = "0.0.0.0/0"
+    }
   ]
 }
