@@ -107,3 +107,29 @@ module "RDS_sg" {
     }
   ]
 }
+
+# Create Security Group for the EFS Server
+
+module "EFS_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  name    = "EFS Security Group"
+  vpc_id  = module.vpc.vpc_id
+
+  ingress_with_source_security_group_id = [
+    {
+      from_port   = 2049
+      to_port     = 2049
+      protocol    = "tcp"
+      description = "Enable NFS access on port 2049"
+      source_security_group_id = "${module.EC2_sg.security_group_id}"
+    },
+  ]
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+}
