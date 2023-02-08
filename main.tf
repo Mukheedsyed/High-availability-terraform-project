@@ -81,3 +81,29 @@ module "EC2_sg" {
     }
   ]
 }
+
+# Create Security Group for the DataBase Server
+
+module "RDS_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  name    = "DataBase Security Group"
+  vpc_id  = module.vpc.vpc_id
+
+  ingress_with_source_security_group_id = [
+    {
+      from_port   = 3306
+      to_port     = 3306
+      protocol    = "tcp"
+      description = "Enable MySQL/Aurora access on port 3306"
+      source_security_group_id = "${module.EC2_sg.security_group_id}"
+    },
+  ]
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+}
